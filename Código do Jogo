@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+int var1, var2;
+char simbjog, simbmaq = 'O';
+char original[3][3]= {
+{'1', '2', '3'},
+{'4', '5', '6'},
+{'7', '8', '9'}
+};
+void escolher_simbolo() {
+char simbolo;
+int lixo, valido = 0;
+while (valido == 0) {
+printf("Escolha seu símbolo(sem numeros ou espaços): \n");
+if (scanf(" %c", &simbolo) != 1)
+exit(1);
+while ((lixo = getchar()) != '\n' && lixo != EOF);
+if (isdigit((unsigned char)simbolo))
+printf("Símbolo inválido!.\n");
+else if (!isgraph((unsigned char)simbolo))
+printf("Símbolo inválido!\n");
+else
+valido = 1;
+}
+if (simbolo == 'X' || simbolo == 'x') {
+simbjog = 'X';
+}
+else if (simbolo == 'O' || simbolo == 'o') {
+simbjog = 'O';
+simbmaq = 'X';
+}
+else
+simbjog = simbolo;
+return;
+}
+char casa(char matriz[][3], int pos) {
+for (var1=0; var1 <= 2; var1++) {
+for (var2=0; var2 <= 2; var2++) {
+if (original[var1][var2] == '0' + pos)
+return matriz[var1][var2];
+}
+}
+return ' ';
+}
+int livre (char matriz[][3], int pos) {
+if (pos < 1 || pos > 9)
+return 0;
+return casa(matriz, pos) == '0' + pos;
+}
+void inserir (char matriz[][3], char n, char jogador) {
+int var1, var2;
+for (var1=0; var1 <= 2; var1++) {
+for (var2=0; var2 <= 2; var2++) {
+if (matriz[var1][var2] == n)
+matriz[var1][var2] = jogador;
+}
+}
+}
+int linhas[8][3] = {
+{1,2,3}, {4,5,6}, {7,8,9},
+{1,4,7}, {2,5,8}, {3,6,9},
+{1,5,9}, {3,5,7}
+};
+int completar(char matriz[][3], char c) {
+int i, a, b, d;
+for (i=0; i < 8; i++) {
+a = linhas[i][0];
+b = linhas[i][1];
+d = linhas[i][2];
+if (casa(matriz, a) == c && casa(matriz, b) == c && livre(matriz, d))
+return d;
+if (casa(matriz, a) == c && casa(matriz, d) == c && livre(matriz, b))
+return b;
+if (casa(matriz, b) == c && casa(matriz, d) == c && livre(matriz, a))
+return a;
+}
+return -1;
+}
+int jogada_maquina(char matriz[][3]) {
+int m, i;
+int cantos[4] = {1, 3, 7, 9};
+int lados[4] = {2, 4, 6, 8};
+int entre[4][2] = {{2,4}, {2,6}, {4,8}, {6,8}};
+m = completar(matriz, simbmaq);
+if (m != -1)
+return m;
+m = completar(matriz, simbjog);
+if (m != -1)
+return m;
+if (livre(matriz, 5))
+return 5;
+if ((casa(matriz, 1) == simbjog && casa(matriz, 9) == simbjog) ||
+ (casa(matriz, 3) == simbjog && casa(matriz, 7) == simbjog)) {
+for (i=0; i < 4; i++)
+if (livre(matriz, lados[i]))
+return lados[i];
+}
+for (i=0; i < 4; i++)
+if (casa(matriz, cantos[i]) == simbjog && livre(matriz, 10 - cantos[i]))
+return 10 - cantos[i];
+for (i=0; i < 4; i++)
+if (livre(matriz, cantos[i]) && casa(matriz, entre[i][0]) == simbjog && casa(matriz,
+entre[i][1]) == simbjog)
+return cantos[i];
+for (i=0; i < 4; i++)
+if (livre(matriz, cantos[i]))
+return cantos[i];
+for (i=1; i <= 9; i++)
+if (livre(matriz, i))
+return i;
+return -1;
+}
+int main() {
+int i, j, X=0, O=0, fim=0, livres, vez=0, empate=0, pos;
+char escolha;
+char tabuleiro[3][3] = {
+{'1', '2', '3'},
+{'4', '5', '6'},
+{'7', '8', '9'}
+};
+printf("Bem-vindo ao Jogo da Velha do grupo 3!\n");
+printf("Alunos: Caio Lubiana, Caio Cipriano e Caio Oliveira\n");
+escolher_simbolo();
+printf("Você é o (%c) e a máquina é o (%c).\n", simbjog, simbmaq);
+while (fim != 1) {
+for (i=0; i <= 2; i++) {
+if (tabuleiro[i][0] == tabuleiro[i][1] && tabuleiro[i][1] == tabuleiro[i][2]) {
+fim = 1;
+if (tabuleiro[i][0] == simbjog)
+X = 1;
+else if(tabuleiro[i][0] == simbmaq)
+O = 1;
+break;
+}
+}
+for (j=0; j <= 2; j++) {
+if (tabuleiro[0][j] == tabuleiro[1][j] && tabuleiro[1][j] == tabuleiro[2][j]) {
+fim = 1;
+if (tabuleiro[0][j] == simbjog)
+X = 1;
+else if(tabuleiro[0][j] == simbmaq)
+O = 1;
+break;
+}
+}
+if (tabuleiro[0][0] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][2]) {
+fim = 1;
+if (tabuleiro[0][0] == simbjog)
+X = 1;
+else if(tabuleiro[0][0] == simbmaq)
+O = 1;
+}
+if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0]) {
+fim = 1;
+if (tabuleiro[0][2] == simbjog)
+X = 1;
+else if(tabuleiro[0][2] == simbmaq)
+O = 1;
+}
+livres = 0;
+for (i=0; i <= 2; i++)
+for (j=0; j <= 2; j++)
+if (tabuleiro[i][j] != simbjog && tabuleiro[i][j] != simbmaq)
+livres++;
+if (fim == 0 && livres == 0) {
+fim = 1;
+empate = 1;
+}
+for (i=0; i <= 2; i++) {
+printf("\n");
+for (j=0; j<=2; j++) {
+if (j==0)
+printf(" %c |", tabuleiro[i][j]);
+else if (j==1)
+printf(" %c ", tabuleiro[i][j]);
+else if(j == 2)
+printf("| %c", tabuleiro[i][j]);
+}
+if (i < 2) {
+printf("\n");
+printf("-----------");
+}
+}
+if (X==1) {
+printf("\n\nVITÓRIA DO JOGADOR");
+}
+else if (O==1) {
+printf("\n\nVITÓRIA DA MÁQUINA");
+}
+else if (empate==1) {
+printf("\n\nEMPATE\n");
+}
+if (fim == 1)
+break;
+if (vez == 0) {
+printf("\n\nEscolha uma posição (1-9):");
+scanf(" %c", &escolha);
+if (livre(tabuleiro, escolha - '0') == 0) {
+printf("\nPosição inválida ou ocupada!");
+continue;
+}
+inserir(tabuleiro, escolha, simbjog);
+}
+else {
+pos = jogada_maquina(tabuleiro);
+printf("\n");
+inserir(tabuleiro, '0' + pos, simbmaq);
+}
+vez = 1 - vez;
+}
+return 0;
+}
